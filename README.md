@@ -20,10 +20,10 @@ gem 'valkyrie-moab'
 Follow the Valkyrie README to get a development or production environment up and running. To enable Moab support,
 add the following to your application's `config/initializers/valkyrie.rb`:
 
-  Valkyrie::StorageAdapter.register(
-    Valkyrie::Storage::Moab.new(storage_roots: [Rails.root.join("tmp", "moab")], storage_trunk: 'files'),
-    :moab
-  )
+    Valkyrie::StorageAdapter.register(
+      Valkyrie::Storage::Moab.new(storage_roots: [Rails.root.join("tmp", "moab")], storage_trunk: 'files'),
+      :moab
+    )
 
 You can then use `:moab` as a storage adapter value in `config/valkyrie.yml`
 
