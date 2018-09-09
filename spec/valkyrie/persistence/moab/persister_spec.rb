@@ -10,5 +10,6 @@ RSpec.describe Valkyrie::Persistence::Moab::Persister do
   let(:adapter) { Valkyrie::Persistence::Moab::MetadataAdapter.new(storage_roots: [ROOT_PATH.join("tmp")], storage_trunk: "files_test") }
   let(:query_service) { adapter.query_service }
   let(:persister) { adapter.persister }
+  let(:resource_factory) { adapter.resource_factory }
   it_behaves_like "a Valkyrie::Persister"
 end

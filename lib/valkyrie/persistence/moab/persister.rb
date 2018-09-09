@@ -19,6 +19,9 @@ module Valkyrie::Persistence::Moab
     # (see Valkyrie::Persistence::Memory::Persister#save_all)
     def save_all(resources:)
       repository(resources).persist
+    rescue Valkyrie::Persistence::StaleObjectError
+      # Re-raising with no error message to prevent confusion
+      raise Valkyrie::Persistence::StaleObjectError, "One or more resources have been updated by another process."
     end
 
     # (see Valkyrie::Persistence::Memory::Persister#delete)
@@ -26,6 +29,10 @@ module Valkyrie::Persistence::Moab
       repository([resource]).delete.first
     end
   
+    def wipe!
+      ::Moab::Config.storage_roots.each { |root| FileUtils.rm_rf(File.join(root, ::Moab::Config.storage_trunk)) }
+    end
+
     def repository(resources)
       Valkyrie::Persistence::Moab::Repository.new(
         resources: resources,

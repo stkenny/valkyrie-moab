@@ -17,6 +17,7 @@ module Valkyrie::Persistence::Moab
     def find_by(id:)
       validate_id(id)
       storage_repository.find_storage_object(id.to_s).current_version || raise(::Valkyrie::Persistence::ObjectNotFoundError)
+      path = Moab::StorageService.retrieve_file("metadata", "#{id}.jsonld", "#{id}")
     end
 
     # @return [Array<Valkyrie::Resource>] All objects in the persistence backend.

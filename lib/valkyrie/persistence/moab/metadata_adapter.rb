@@ -27,7 +27,13 @@ module Valkyrie::Persistence::Moab
     end
 
     def resource_factory
-      Valkyrie::Persistence::Moab::ResourceFactory.new(adapter: self)
+      @resource_factory ||= Valkyrie::Persistence::Moab::ResourceFactory.new(adapter: self)
+    end
+
+    def id
+      @id ||= begin
+        Valkyrie::ID.new(Digest::MD5.hexdigest("moab://#{storage_roots.first}"))
+      end
     end
   end
 end
