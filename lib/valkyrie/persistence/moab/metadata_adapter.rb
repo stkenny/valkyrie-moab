@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 module Valkyrie::Persistence::Moab
   class MetadataAdapter
-    attr_writer :storage_repository
-
     attr_reader :storage_roots, :storage_trunk
 
     def initialize(storage_roots:, storage_trunk:)
@@ -22,17 +20,15 @@ module Valkyrie::Persistence::Moab
       @query_service ||= Valkyrie::Persistence::Moab::QueryService.new(adapter: self)
     end
 
-    def storage_repository
-      @storage_repository ||= ::Moab::StorageRepository.new
-    end
-
-    def resource_factory
-      @resource_factory ||= Valkyrie::Persistence::Moab::ResourceFactory.new(adapter: self)
+    def storage_object_paths
+      glob = Dir.glob(storage_roots.map { |root| File.join(root, storage_trunk, '**/*/') })
+      puts glob
+      glob
     end
 
     def id
       @id ||= begin
-        Valkyrie::ID.new(Digest::MD5.hexdigest("moab://#{storage_roots.first}"))
+        Valkyrie::ID.new(Digest::MD5.hexdigest("moab://#{storage_roots.join(':')}"))
       end
     end
   end

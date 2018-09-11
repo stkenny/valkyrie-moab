@@ -7,5 +7,6 @@ module Valkyrie::Persistence
     require 'valkyrie/persistence/moab/repository'
     require 'valkyrie/persistence/moab/resource_factory'
     require 'valkyrie/persistence/moab/model_converter'
+    require 'valkyrie/persistence/moab/orm_converter'
   end
 end

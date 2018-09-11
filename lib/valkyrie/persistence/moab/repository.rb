@@ -3,23 +3,15 @@ require 'tempfile'
 
 module Valkyrie::Persistence::Moab
   class Repository
-    include Valkyrie::Moab
 
-    attr_reader :resources, :resource_factory
+    attr_reader :adapter, :resources
 
-    delegate :adapter, to: :resource_factory
-
-    def initialize(resources:, resource_factory:, storage_roots:, storage_trunk:)
+    def initialize(adapter:, resources:)
+      @adapter = adapter
       @resources = resources
-      @resource_factory = resource_factory
-
-      ::Moab::Config.storage_roots = storage_roots
-      ::Moab::Config.storage_trunk = storage_trunk
-
-      storage_roots.each { |root| FileUtils.mkpath(File.join(root, storage_trunk)) }
     end
 
-    def persist    
+    def persist
       resources.map do |resource|
         raise Valkyrie::Persistence::StaleObjectError, "The object #{resource.id} has been updated by another process." unless valid_lock?(resource)
 
@@ -29,36 +21,21 @@ module Valkyrie::Persistence::Moab
         internal_resource.created_at ||= Time.current
         internal_resource.updated_at = Time.current
         generate_lock_token(internal_resource)
-        
-        metadata_file = Tempfile.new("#{internal_resource.id}_jsonld")
-        begin
-          File.open(metadata_file, "w") do |f|
-            f.write(resource_metadata(internal_resource).to_json)
-          end
 
-          add_to_moab(internal_resource.id.to_s, 'metadata', metadata_file, "#{internal_resource.id}.jsonld")
-        ensure
-          metadata_file.close
-          metadata_file.unlink   # deletes the temp file
-        end
+        internal_resource = ResourceFactory.new.from_resource(resource: internal_resource)
 
+        internal_resource.new_record = false
         internal_resource
       end
     end
 
     def delete
-      
+      resources.map do |resource|
+        FileUtils.remove_dir(::Moab::StorageServices.object_path(resource.id.to_s), true)
+      end
     end
 
     private
-
-      def resource_metadata(resource)
-        output = resource.to_h.except(:imported_metadata).compact
-        if output[:optimistic_lock_token]
-          output[:optimistic_lock_token] = Array.wrap(output[:optimistic_lock_token]).map(&:serialize)
-        end
-        output
-      end
 
       def valid_lock?(resource)
         return true if resource.id.blank?
@@ -82,7 +59,6 @@ module Valkyrie::Persistence::Moab
       end
 
       def generate_id(resource)
-        Valkyrie.logger.warn "The Moab adapter is not meant to persist new resources, but is now generating an ID."
         resource.new(id: SecureRandom.uuid)
       end
   end

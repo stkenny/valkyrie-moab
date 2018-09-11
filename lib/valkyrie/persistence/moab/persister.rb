@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 module Valkyrie::Persistence::Moab
-  require 'valkyrie/persistence/moab/repository'
   class Persister
 
     attr_reader :adapter
 
-    delegate :resource_factory, :storage_roots, :storage_trunk, to: :adapter
+    delegate :storage_roots, :storage_trunk, to: :adapter
 
     def initialize(adapter:)
       @adapter = adapter
+
+      ::Moab::Config.storage_roots = storage_roots
+      ::Moab::Config.storage_trunk = storage_trunk
+
+      storage_roots.each { |root| FileUtils.mkpath(File.join(root, storage_trunk)) }
     end
 
     # (see Valkyrie::Persistence::Memory::Persister#save)
@@ -28,18 +32,19 @@ module Valkyrie::Persistence::Moab
     def delete(resource:)
       repository([resource]).delete.first
     end
-  
+
     def wipe!
-      ::Moab::Config.storage_roots.each { |root| FileUtils.rm_rf(File.join(root, ::Moab::Config.storage_trunk)) }
+      storage_roots.each { |root| FileUtils.remove_dir(File.join(root, storage_trunk, '*'), true) }
     end
 
-    def repository(resources)
-      Valkyrie::Persistence::Moab::Repository.new(
-        resources: resources,
-        resource_factory: resource_factory,
-        storage_roots: storage_roots,
-        storage_trunk: storage_trunk
-      )
-    end
+    private
+
+      def repository(resources)
+        Repository.new(
+          adapter: adapter,
+          resources: resources,
+        )
+      end
+
   end
 end

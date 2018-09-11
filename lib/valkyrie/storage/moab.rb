@@ -18,13 +18,13 @@ module Valkyrie::Storage
     # @param resource [Valkyrie::Resource]
     # @return [Valkyrie::StorageAdapter::File]
     def upload(file:, original_filename:, resource:)
-      group_id = 'content'
-      digital_object_id = resource.id.to_s
-      add_to_moab(digital_object_id, group_id, file, original_filename)
+      file_category = 'content'
+      storage_object_id = resource.id.to_s
+      add_to_moab(storage_object_id, file_category, file, original_filename)
 
-      find_by(id: Valkyrie::ID.new("moab://#{digital_object_id}/#{group_id}/#{original_filename}"))
+      find_by(id: Valkyrie::ID.new("moab://#{storage_object_id}/#{file_category}/#{original_filename}"))
     end
-   
+
     # @param id [Valkyrie::ID]
     # @return [Boolean] true if this adapter can handle this type of identifer
     def handles?(id:)
@@ -45,10 +45,10 @@ module Valkyrie::Storage
     # @raise Valkyrie::StorageAdapter::FileNotFound if nothing is found
     def find_by(id:)
       path = file_path(id)
-      digital_object_id, group_id = id_from_path(path)
+      storage_object_id, file_category = id_from_path(path)
 
-      moab_path = find_moab_filepath(path, digital_object_id, group_id)
-      
+      moab_path = find_moab_filepath(storage_object_id, path, file_category)
+
       Valkyrie::StorageAdapter::File.new(id: Valkyrie::ID.new(id.to_s), io: ::File.open(moab_path, 'rb'))
     rescue ::Moab::FileNotFoundException
       raise Valkyrie::StorageAdapter::FileNotFound
@@ -58,9 +58,9 @@ module Valkyrie::Storage
     # @param id [Valkyrie::ID]
     def delete(id:)
       path = file_path(id)
-      digital_object_id, group_id = id_from_path(path)
+      storage_object_id, file_category = id_from_path(path)
 
-      delete_from_moab(path, digital_object_id, group_id)
+      delete_from_moab(storage_object_id, path, file_category)
     end
   end
 end
