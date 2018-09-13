@@ -20,10 +20,8 @@ module Valkyrie::Persistence::Moab
       @query_service ||= Valkyrie::Persistence::Moab::QueryService.new(adapter: self)
     end
 
-    def storage_object_paths
-      glob = Dir.glob(storage_roots.map { |root| File.join(root, storage_trunk, '**/*/') })
-      puts glob
-      glob
+    def storage_path
+      File.join(storage_roots.first, storage_trunk)
     end
 
     def id

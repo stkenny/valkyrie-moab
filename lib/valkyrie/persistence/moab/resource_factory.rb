@@ -7,7 +7,7 @@ module Valkyrie::Persistence::Moab
     end
 
     def to_resource(object:)
-      ORMConverter.new(object: object).convert
+      Valkyrie::Persistence::Moab::ORMConverter.new(object: object).convert
     end
   end
 end

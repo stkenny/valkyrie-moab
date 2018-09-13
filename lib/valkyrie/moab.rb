@@ -11,7 +11,6 @@ module Valkyrie
       moab_action(id) do |version, file_inventory|
         moab_path = File.join(version.version_pathname, 'data', file_category)
         FileUtils.mkpath(moab_path)
-
         version.ingest_file(file.path, File.join(moab_path, original_filename), false)
 
         add_file_to_inventory(Pathname.new(File.join(moab_path, original_filename)), file_inventory, file_category)
@@ -20,7 +19,6 @@ module Valkyrie
 
     def find_moab_filepath(id, path, file_category)
       storage_object = storage_repository.storage_object(id)
-
       current_object_version = storage_object.current_version
       current_object_version.find_filepath(file_category, Pathname.new(path).basename.to_s)
     rescue ::Moab::ObjectNotFoundException

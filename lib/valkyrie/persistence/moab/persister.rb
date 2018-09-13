@@ -34,7 +34,9 @@ module Valkyrie::Persistence::Moab
     end
 
     def wipe!
-      storage_roots.each { |root| FileUtils.remove_dir(File.join(root, storage_trunk, '*'), true) }
+      storage_roots.each do |root|
+        FileUtils.remove_dir(File.join(root, storage_trunk, '.'), true)
+      end
     end
 
     private

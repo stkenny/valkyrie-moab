@@ -11,7 +11,7 @@ RSpec.describe Valkyrie::Persistence::Moab::QueryService do
 
   let(:query_service) { adapter.query_service }
   let(:persister) { adapter.persister }
-  before do
+  after do
     persister.wipe!
   end
   it_behaves_like "a Valkyrie query provider"
