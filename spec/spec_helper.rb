@@ -17,6 +17,7 @@ end
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 require 'valkyrie/moab'
 require 'pry'
+require 'action_dispatch'
 
 ROOT_PATH = Pathname.new(Dir.pwd)
 Dir[Pathname.new("./").join("spec", "support", "**", "*.rb")].sort.each { |file| require_relative file.gsub(/^spec\//, "") }
