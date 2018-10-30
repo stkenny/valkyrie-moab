@@ -21,6 +21,7 @@ Follow the Valkyrie README to get a development or production environment up and
 
 To enable Moab storage support, add the following to your application's ```config/initializers/valkyrie.rb```:
 
+```ruby
     Valkyrie::StorageAdapter.register(
       Valkyrie::Storage::Moab.new(
           storage_roots: [Rails.root.join("tmp", "moab")], 
@@ -28,7 +29,7 @@ To enable Moab storage support, add the following to your application's ```confi
       ),
       :moab
     )
-
+```
 You can then use `:moab` as a storage adapter value in `config/valkyrie.yml`
 
 Configure the metadata adapter in Valkyrie by adding the following to your ```config/initializers/valkyrie.rb```:
