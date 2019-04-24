@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Valkyrie::Persistence::Moab
-class ModelConverter
+  class ModelConverter
     include Valkyrie::Moab
 
     attr_reader :resource
@@ -10,7 +10,7 @@ class ModelConverter
     end
 
     def convert
-       metadata_file = Tempfile.new("#{resource.id}_jsonld")
+      metadata_file = Tempfile.new("#{resource.id}_jsonld")
       begin
         File.open(metadata_file, "w") do |f|
           f.write(resource_metadata(resource).to_json)
@@ -19,7 +19,7 @@ class ModelConverter
         add_to_moab(resource.id.to_s, 'metadata', metadata_file, "#{resource.id}.jsonld")
       ensure
         metadata_file.close
-        metadata_file.unlink   # deletes the temp file
+        metadata_file.unlink # deletes the temp file
       end
 
       resource

@@ -8,9 +8,10 @@ RSpec.describe Valkyrie::Persistence::Moab::Persister do
   end
 
   let(:adapter) do
-   Valkyrie::Persistence::Moab::MetadataAdapter.new(
-     storage_roots: [ROOT_PATH.join("tmp").to_s],
-     storage_trunk: "files_test")
+    Valkyrie::Persistence::Moab::MetadataAdapter.new(
+      storage_roots: [ROOT_PATH.join("tmp").to_s],
+      storage_trunk: "files_test"
+    )
   end
   let(:query_service) { adapter.query_service }
   let(:persister) { adapter.persister }

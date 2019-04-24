@@ -6,7 +6,6 @@ require 'valkyrie/storage/moab'
 
 module Valkyrie
   module Moab
-
     def add_to_moab(id, file_category, file, original_filename)
       moab_action(id) do |version, file_inventory|
         moab_path = File.join(version.version_pathname, 'data', file_category)
@@ -52,7 +51,7 @@ module Valkyrie
 
         # get the current version inventories and create new
         current_file_inventory = current_storage_object.file_inventory('version')
-        new_file_inventory = updated_file_inventory(current_file_inventory, current_storage_object)
+        new_file_inventory = updated_file_inventory(current_storage_object)
 
         # create the storage area for the new version
         new_version = storage_object_version(id, version: current_storage_object.version_id.next)
@@ -73,13 +72,12 @@ module Valkyrie
         new_version.generate_manifest_inventory
       end
 
-      def updated_file_inventory(current_file_inventory, storage_object)
+      def updated_file_inventory(storage_object)
         new_file_inventory = storage_object.file_inventory('version')
         new_file_inventory.version_id = new_file_inventory.version_id.next
 
         new_file_inventory
       end
-
 
       def storage_object_version(id, version: nil)
         storage_object = storage_repository.storage_object(id, create: true)
@@ -94,6 +92,5 @@ module Valkyrie
       def storage_repository
         @storage_repository ||= ::Moab::StorageRepository.new
       end
-
   end
 end

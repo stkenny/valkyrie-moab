@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module Valkyrie::Persistence::Moab
   class ResourceFactory
-
     def from_resource(resource:)
       Valkyrie::Persistence::Moab::ModelConverter.new(resource: resource).convert
     end

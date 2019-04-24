@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module Valkyrie::Persistence::Moab
   class Persister
-
     attr_reader :adapter
 
     delegate :storage_roots, :storage_trunk, to: :adapter
@@ -44,9 +43,8 @@ module Valkyrie::Persistence::Moab
       def repository(resources)
         Repository.new(
           adapter: adapter,
-          resources: resources,
+          resources: resources
         )
       end
-
   end
 end

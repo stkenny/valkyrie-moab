@@ -3,7 +3,6 @@ require 'tempfile'
 
 module Valkyrie::Persistence::Moab
   class Repository
-
     attr_reader :adapter, :resources
 
     def initialize(adapter:, resources:)

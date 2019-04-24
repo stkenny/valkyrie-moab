@@ -24,15 +24,14 @@ module Valkyrie::Persistence::Moab
     def find_by_alternate_identifier(alternate_identifier:)
       raise ArgumentError, "alternate_identifier must be a Valkyrie::ID" unless alternate_identifier.is_a?(Valkyrie::ID) || alternate_identifier.is_a?(String)
       Valkyrie.logger.warn("Moab Query Service has been asked to find a resource by its alternate identifier. This will require iterating over the metadata of every storage object - AVOID.")
-      alternate_identifier = Valkyrie::ID.new(alternate_identifier.to_s)
+      alternate_identifier = Valkyrie::ID.new(alternate_identifier.to_s) if alternate_identifier.is_a?(String)
       output = all_storage_objects do |id|
         resource = find_by(id: id)
-        break resource if resource.alternate_ids.include?(alternate_identifier)
+        break resource if resource.respond_to?(:alternate_ids) && resource.alternate_ids.include?(alternate_identifier)
       end
       raise Valkyrie::Persistence::ObjectNotFoundError unless output.present?
       output
     end
-
 
     def find_many_by_ids(ids:)
       ids.uniq.map do |id|
@@ -99,13 +98,16 @@ module Valkyrie::Persistence::Moab
     # @return [Array<Valkyrie::Resource>] All resources in the persistence backend
     #   which have the ID of the given `resource` in their `property` property. Not
     #   in order.
-    def find_inverse_references_by(resource:, property:)
-      raise ArgumentError, "resource is not saved" unless resource.persisted?
+    def find_inverse_references_by(resource: nil, id: nil, property:)
+      raise ArgumentError, "Provide resource or id" unless resource || id
+      raise ArgumentError, "resource is not saved" if resource && !resource.persisted?
       Valkyrie.logger.warn("Moab Query Service has been asked to find inverse references. This will require iterating over the metadata of every storage object - AVOID.")
 
+      resource ||= find_by(id: id)
+
       resources = []
-      all_storage_objects do |id|
-        potential_inverse_reference = find_by(id: id)
+      all_storage_objects do |storage_object_id|
+        potential_inverse_reference = find_by(id: storage_object_id)
         resources << potential_inverse_reference if (potential_inverse_reference.try(property) || []).include?(resource.id)
       end
 
@@ -129,11 +131,11 @@ module Valkyrie::Persistence::Moab
 
       def all_storage_objects
         Find.find(adapter.storage_path) do |path|
-          if File.directory?(File.join(path, 'v0001'))
-            id = Valkyrie::ID.new(Pathname.new(path).basename)
-            yield(id)
-            Find.prune
-          end
+          next unless File.directory?(File.join(path, 'v0001'))
+
+          id = Valkyrie::ID.new(Pathname.new(path).basename)
+          yield(id)
+          Find.prune
         end
       end
 
