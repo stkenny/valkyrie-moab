@@ -2,11 +2,6 @@
 
 A [Moab](http://journal.code4lib.org/articles/8482) storage backend for [Valkyrie](https://github.com/samvera-labs/valkyrie)
 
-## Requirements
-
-### Ruby version
-Ruby 2.3 or above
-
 ## Installation
 
 Add this line to your application's Gemfile:
