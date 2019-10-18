@@ -16,8 +16,9 @@ module Valkyrie::Storage
     # @param file [IO]
     # @param original_filename [String]
     # @param resource [Valkyrie::Resource]
+    # @param _extra_arguments [Hash] additional arguments which may be passed to other adapters
     # @return [Valkyrie::StorageAdapter::File]
-    def upload(file:, original_filename:, resource:)
+    def upload(file:, original_filename:, resource: nil, **_extra_arguments)
       file_category = 'content'
       storage_object_id = resource.id.to_s
       add_to_moab(storage_object_id, file_category, file, original_filename)

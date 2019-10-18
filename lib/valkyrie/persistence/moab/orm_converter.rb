@@ -16,7 +16,7 @@ module Valkyrie::Persistence::Moab
     private
 
       def converted_attributes
-        @converted_attributes ||= Valkyrie::Persistence::Postgres::ORMConverter::RDFMetadata.new(attributes).result.symbolize_keys
+        @converted_attributes ||= RDFMetadata.new(attributes).result.symbolize_keys
       end
 
       def attributes
@@ -35,6 +35,12 @@ module Valkyrie::Persistence::Moab
 
       def resource_klass
         internal_resource.constantize
+      end
+
+      # Responsible for converting `metadata` JSON-B field in
+      # {Valkyrie::Persistence::Moab::ORM::Resource} into an acceptable hash
+      # for {Valkyrie::Resource}
+      class RDFMetadata < ::Valkyrie::Persistence::Shared::JSONValueMapper
       end
   end
 end

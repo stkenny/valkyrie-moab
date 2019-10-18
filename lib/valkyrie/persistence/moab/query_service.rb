@@ -73,6 +73,7 @@ module Valkyrie::Persistence::Moab
     # @return [Array<Valkyrie::Resource>] child objects of type `model` referenced by
     #   `resource`'s `member_ids` method. Returned in order.
     def find_members(resource:, model: nil)
+      return [] unless resource.respond_to? :member_ids
       find_references_by(resource: resource, property: :member_ids).select do |member|
         model.nil? || member.is_a?(model)
       end
@@ -85,7 +86,7 @@ module Valkyrie::Persistence::Moab
     #   `property` property on `resource`. Not necessarily in order.
     def find_references_by(resource:, property:)
       ids = (resource.try(property) || []).select { |id| id.is_a?(Valkyrie::ID) }
-      ids.uniq! unless resource.class.schema[property] && resource.class.schema[property].meta[:ordered]
+      ids.uniq! unless ordered_property?(resource: resource, property: property)
       ids.lazy.map do |id|
         find_by(id: id)
       end
@@ -103,6 +104,7 @@ module Valkyrie::Persistence::Moab
       raise ArgumentError, "resource is not saved" if resource && !resource.persisted?
       Valkyrie.logger.warn("Moab Query Service has been asked to find inverse references. This will require iterating over the metadata of every storage object - AVOID.")
 
+      id ||= resource.id
       resource ||= find_by(id: id)
 
       resources = []
@@ -147,6 +149,10 @@ module Valkyrie::Persistence::Moab
 
       def validate_id(id)
         raise ArgumentError, "id must be a Valkyrie::ID" unless id.is_a?(Valkyrie::ID) || id.is_a?(String)
+      end
+
+      def ordered_property?(resource:, property:)
+        resource.ordered_attribute?(property)
       end
   end
 end
