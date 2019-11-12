@@ -19,7 +19,7 @@ RSpec.describe Valkyrie::Storage::Moab do
   let(:storage_adapter) { described_class.new(storage_roots: [ROOT_PATH.join("tmp")], storage_trunk: "moab") }
   let(:file) { fixture_file_upload('files/example.tif', 'image/tiff') }
   it "creates moab manifests on upload and deletes entries on delete" do
-    output_file = storage_adapter.upload(file: file, original_filename: "example.tif", resource: TestResource.new(id: 'test'))
+    output_file = storage_adapter.upload(file: file, original_filename: "example.tif", resource: TestResource.new(id: 'test'), file_category: 'content')
     storage_object = Moab::StorageObject.new('test', File.join(ROOT_PATH.join("tmp", "moab/te/st/test")))
     file_inventory = storage_object.current_version.file_inventory('version')
     expect(file_inventory.group_empty?('content')).to be false
