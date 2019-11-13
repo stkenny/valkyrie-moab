@@ -16,6 +16,7 @@ module Valkyrie::Storage
     # @param file [IO]
     # @param original_filename [String]
     # @param resource [Valkyrie::Resource]
+    # @param file_category [The category of file ('content' or 'metadata')]
     # @param _extra_arguments [Hash] additional arguments which may be passed to other adapters
     # @return [Valkyrie::StorageAdapter::File]
     def upload(file:, original_filename:, resource: nil, file_category: 'content', **_extra_arguments)
