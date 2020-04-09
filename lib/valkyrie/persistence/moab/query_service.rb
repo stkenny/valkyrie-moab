@@ -84,13 +84,27 @@ module Valkyrie::Persistence::Moab
     #   to be de-referenced.
     # @return [Array<Valkyrie::Resource>] All objects which are referenced by the
     #   `property` property on `resource`. Not necessarily in order.
-    def find_references_by(resource:, property:)
+    def find_references_by(resource:, property:, model: nil)
       ids = (resource.try(property) || []).select { |id| id.is_a?(Valkyrie::ID) }
       ids.uniq! unless ordered_property?(resource: resource, property: property)
-      ids.lazy.map do |id|
+      resources = ids.lazy.map do |id|
         find_by(id: id)
       end
+      filter_by_model(resources, model)
     end
+
+    def find_all_of_model(model:)
+      Valkyrie.logger.warn("Moab Query Service has been asked to find all resources of a specific type. This will require iterating over the metadata of every bag - AVOID.")
+      find_all.select do |resource|
+        resource.is_a?(model)
+      end
+    end
+
+    def count_all_of_model(model:)
+      Valkyrie.logger.warn("Moab Query Service has been asked to find all resources of a specific type. This will require iterating over the metadata of every bag - AVOID.")
+      find_all_of_model(model: model).to_a.length
+    end
+
 
     # @param resource [Valkyrie::Resource] The resource which is being referenced by
     #   other resFind.find('tmp/files_test') do |path|ources.
@@ -99,7 +113,7 @@ module Valkyrie::Persistence::Moab
     # @return [Array<Valkyrie::Resource>] All resources in the persistence backend
     #   which have the ID of the given `resource` in their `property` property. Not
     #   in order.
-    def find_inverse_references_by(resource: nil, id: nil, property:)
+    def find_inverse_references_by(resource: nil, id: nil, model: nil, property:)
       raise ArgumentError, "Provide resource or id" unless resource || id
       raise ArgumentError, "resource is not saved" if resource && !resource.persisted?
       Valkyrie.logger.warn("Moab Query Service has been asked to find inverse references. This will require iterating over the metadata of every storage object - AVOID.")
@@ -113,7 +127,7 @@ module Valkyrie::Persistence::Moab
         resources << potential_inverse_reference if (potential_inverse_reference.try(property) || []).include?(resource.id)
       end
 
-      resources
+      filter_by_model(resources, model)
     end
 
     # @param resource [Valkyrie::Resource] The resource whose parents are being searched
@@ -153,6 +167,11 @@ module Valkyrie::Persistence::Moab
 
       def ordered_property?(resource:, property:)
         resource.ordered_attribute?(property)
+      end
+
+      def filter_by_model(resources, model)
+        return resources unless model
+        resources.select { |found_resource| found_resource.class == model }
       end
   end
 end
